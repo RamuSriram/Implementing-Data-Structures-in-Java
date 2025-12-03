@@ -16,7 +16,7 @@ class CustomHashSet{
     }
 
     boolean contains(int num){
-        if(num % (hashFunc(num, size)) == -1){
+        if(dataArray[hashFunc(num, size)] == num){ 
             return true;
         }
         return false;
@@ -32,7 +32,7 @@ class CustomHashSet{
         // return super.toString();
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<dataArray.length; i++){
-            if(dataArray[i] > 0){
+            if(dataArray[i] > 0){ // I know it wouldn't work if there's any zero value in the set, but again, I am just building an MVP
                 sb.append(dataArray[i] + ":" + i + " ");
             }
         }
