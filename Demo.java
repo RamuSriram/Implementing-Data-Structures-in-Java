@@ -13,10 +13,10 @@ class CustomHashSet {
     int capacity = 0;
     int count = 0;
 
-    CustomHashSet(int capacity) {
-        dataArray = new int[capacity];
+    CustomHashSet(int initialCapacity) {
+        dataArray = new int[initialCapacity];
         Arrays.fill(dataArray, Integer.MIN_VALUE);
-        this.capacity = capacity;
+        this.capacity = initialCapacity;
     }
 
     void add(int elem) {
@@ -31,7 +31,19 @@ class CustomHashSet {
                 return;
             }
         }
-        System.out.println("No empty slot found inserting your element: " + elem);
+        // System.out.println("No empty slot found inserting your element: " + elem); // Let's no longer throw this error to the console, instead, let's do the real thing which is resizing
+        resize();
+        hash = baseHash(elem, capacity); // we are just copy pasting the above code cuz we want to redo the same thing after resizing and rehashing, cuz we would find an empty slot for sure this time
+        for (int i = 0; i < capacity; i++) {
+            int probe = (hash + i) % capacity;
+            if (dataArray[probe] == Integer.MIN_VALUE) {
+                dataArray[probe] = elem;
+                this.count++;
+                return;
+            } else if (dataArray[probe] == elem) {
+                return;
+            }
+        }
     }
 
     boolean contains(int num) {
@@ -74,6 +86,32 @@ class CustomHashSet {
         }
         return sb.toString();
     }
+
+    void resize(){ // let's do the resizing and rehashing thing when our array would get filled/about to get filled
+        int newCapacity = capacity * 2;
+        int newArray[] = new int[newCapacity];
+        Arrays.fill(newArray, Integer.MIN_VALUE);
+        for(int i=0; i<dataArray.length; i++){
+            int temp = dataArray[i];
+            int newHash = baseHash(temp, newCapacity);
+            for (int x = 0; x < newCapacity; x++) {
+                int probe = (newHash + x) % newCapacity;
+                if (newArray[probe] == Integer.MIN_VALUE) {
+                    newArray[probe] = temp;
+                    break;
+                } 
+            }
+        }
+        dataArray = newArray;
+        capacity = newCapacity;
+    }
+
+    void printDataArray(){ // Why not print raw data array for debugging? Seems like a good idea
+        for(int i=0; i<dataArray.length; i++){
+            System.out.print(dataArray[i] + ", ");
+        }
+        System.out.println();
+    }
 }
 
 class Demo {
@@ -102,5 +140,6 @@ class Demo {
         System.out.println(mySet.contains(79));
         System.out.println(mySet.contains(46));
         System.out.println(mySet.count);
+        mySet.printDataArray();
     }
 }
