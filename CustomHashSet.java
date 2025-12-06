@@ -19,10 +19,12 @@ public class CustomHashSet {
     int dataArray[];
     int capacity = 0;   // current length of dataArray
     int count = 0;      // number of REAL elements stored (ignores EMPTY and DELETED)
+    private static final int EMPTY = Integer.MIN_VALUE; 
+    private static final int DELETED = Integer.MIN_VALUE; // We also call it a Tombstone
 
     CustomHashSet(int initialCapacity) {
         dataArray = new int[initialCapacity];
-        Arrays.fill(dataArray, Integer.MIN_VALUE); // mark all slots as EMPTY
+        Arrays.fill(dataArray, EMPTY); // mark all slots as EMPTY
         this.capacity = initialCapacity;
     }
 
@@ -46,7 +48,7 @@ public class CustomHashSet {
         for (int i = 0; i < capacity; i++) {
             int probe = (hash + i) % capacity;
 
-            if (dataArray[probe] == Integer.MIN_VALUE) {
+            if (dataArray[probe] == EMPTY) {
                 // Case 1: hit a truly EMPTY slot.
                 // At this point we know 'elem' does NOT exist in the table:
                 // if it did, we would have seen it earlier in this chain.
@@ -58,7 +60,7 @@ public class CustomHashSet {
                 }
                 break; // we can stop probing; nothing beyond this EMPTY can be 'elem'
             }
-            else if (dataArray[probe] == Integer.MIN_VALUE + 1) {
+            else if (dataArray[probe] == DELETED) {
                 // Case 2: DELETED (tombstone) slot.
                 // For searching, we MUST continue probing, because original chains
                 // can continue past tombstones.
@@ -106,7 +108,7 @@ public class CustomHashSet {
                 if (dataArray[probe] == num) {
                     // Found the element somewhere in the probe chain.
                     return true;
-                } else if (dataArray[probe] == Integer.MIN_VALUE) {
+                } else if (dataArray[probe] == EMPTY) {
                     // Hit an EMPTY slot: this breaks the probe chain.
                     // Because we never "skip" from a filled slot directly to EMPTY
                     // (except via DELETED), seeing EMPTY means the element cannot
@@ -145,7 +147,7 @@ public class CustomHashSet {
         // print all non-sentinel values along with the index they occupy.
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < dataArray.length; i++) {
-            if (dataArray[i] != Integer.MIN_VALUE && dataArray[i] != Integer.MIN_VALUE + 1) {
+            if (dataArray[i] != EMPTY && dataArray[i] != DELETED) {
                 sb.append(dataArray[i] + ":" + i + " ");
             }
         }
@@ -159,13 +161,13 @@ public class CustomHashSet {
         // - We DROP all tombstones, so the new table is clean (no DELETED slots).
         int newCapacity = capacity * 2;
         int newArray[] = new int[newCapacity];
-        Arrays.fill(newArray, Integer.MIN_VALUE); // all slots start as EMPTY
+        Arrays.fill(newArray, EMPTY); // all slots start as EMPTY
 
         for (int i = 0; i < dataArray.length; i++) {
             int temp = dataArray[i];
 
             // Skip EMPTY and DELETED; only rehash actual elements.
-            if (temp == Integer.MIN_VALUE || temp == Integer.MIN_VALUE + 1) {
+            if (temp == EMPTY || temp == DELETED) {
                 continue;
             }
 
@@ -174,7 +176,7 @@ public class CustomHashSet {
             // Standard linear probing in the new array.
             for (int x = 0; x < newCapacity; x++) {
                 int probe = (newHash + x) % newCapacity;
-                if (newArray[probe] == Integer.MIN_VALUE) {
+                if (newArray[probe] == EMPTY) {
                     newArray[probe] = temp;
                     break;
                 }
@@ -225,10 +227,10 @@ public class CustomHashSet {
 
             if (dataArray[probe] == elem) {
                 // Found the element, turn it into a tombstone.
-                dataArray[probe] = Integer.MIN_VALUE + 1;
+                dataArray[probe] = DELETED;
                 this.count--;
                 return;
-            } else if (dataArray[probe] == Integer.MIN_VALUE) {
+            } else if (dataArray[probe] == EMPTY) {
                 // Hit an EMPTY slot before ever seeing 'elem' in this chain:
                 // that means 'elem' is not present in the set.
                 return;
