@@ -20,7 +20,7 @@ public class CustomHashSet {
     int capacity = 0;   // current length of dataArray
     int count = 0;      // number of REAL elements stored (ignores EMPTY and DELETED)
     private static final int EMPTY = Integer.MIN_VALUE; 
-    private static final int DELETED = Integer.MIN_VALUE; // We also call it a Tombstone
+    private static final int DELETED = Integer.MIN_VALUE + 1; // We also call it a Tombstone
 
     CustomHashSet(int initialCapacity) {
         dataArray = new int[initialCapacity];
