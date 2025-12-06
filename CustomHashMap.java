@@ -17,6 +17,9 @@ public class CustomHashMap {
     }
 
     void put(int key, int value){
+        if((double) (keyCount + 1) / capacity > 0.75){ // Resizing if the specified load factor is hit
+            resize();
+        }
         int hash = baseHash(key, capacity);
         int saveIndex = -1;
         for(int i=0; i<capacity; i++){
@@ -81,6 +84,30 @@ public class CustomHashMap {
             return result + capacity;
         }
         return result;
+    }
+
+    void resize(){
+        int newCapacity = capacity * 2;
+        int newArray[][] = new int[newCapacity][2];
+        fillWithEmpty(newArray);
+        for(int i=0; i<capacity; i++){
+            int key = dataArray[i][0];
+            int value = dataArray[i][1];
+            int hash = baseHash(key, newCapacity);
+            if(key == EMPTY || key == DELETED){
+                continue;
+            }
+            for(int x=0; x<newCapacity; x++){
+                int probe = (hash + x) % newCapacity;
+                if(newArray[probe][0] == EMPTY){
+                    newArray[probe][0] = key; 
+                    newArray[probe][1] = value; 
+                    break;
+                }
+            }
+        }
+        capacity = newCapacity;
+        dataArray = newArray;
     }
 
     int getKeyCount(){
